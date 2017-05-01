@@ -31,7 +31,8 @@ namespace AdvancedBinary {
     /// <param name="Stream">Stream Instance</param>
     /// <param name="FromReader">Determine if the method is invoked from the StructReader or StructWriter</param>
     /// <param name="StructInstance">Struct instance reference</param>
-    public delegate void FieldInvoke(Stream Stream, bool FromReader, dynamic StructInstance);
+    /// <return>Struct Instance</return>
+    public delegate dynamic FieldInvoke(Stream Stream, bool FromReader, dynamic StructInstance);
     
     /// <summary>
     /// Ignore Struct Field
@@ -184,7 +185,6 @@ namespace AdvancedBinary {
                     break;
                 dynamic Value = field.GetValue(Input);
                 switch (field.FieldType.ToString()) {
-
                     case Const.STRING:
                         if (HasAttribute(field, Const.CSTRING) && HasAttribute(field, Const.PSTRING))
                             throw new Exception("You can't use CString and PString Attribute into the same field.");
@@ -205,9 +205,13 @@ namespace AdvancedBinary {
                         if (HasAttribute(field, Const.STRUCT)) {
                             WriteStruct(field.FieldType, ref Value);
                         } else {
-                            if (field.FieldType.BaseType.ToString() == Const.DELEGATE)
-                                ((FieldInvoke)Value).Invoke(BaseStream, false, Input);
-                            else
+                            if (field.FieldType.BaseType.ToString() == Const.DELEGATE) {
+                                FieldInvoke Invoker = ((FieldInvoke)Value);
+                                if (Invoker == null)
+                                    break;
+                                Input = Invoker.Invoke(BaseStream, false, Input);
+                                field.SetValue(Input, Invoker);
+                            } else
                                 Write(Value);
                         }
                         break;
@@ -310,7 +314,10 @@ namespace AdvancedBinary {
                         } else {
                             if (field.FieldType.BaseType.ToString() == Const.DELEGATE) {
                                 FieldInvoke Invoker = (FieldInvoke)field.GetValue(Result);
-                                Invoker?.Invoke(BaseStream, true, Result);
+                                Value = Invoker;
+                                if (Invoker == null)
+                                    break;
+                                Result = Invoker.Invoke(BaseStream, true, Result);                                
                                 break;
                             }
                             throw new Exception("Unk Struct Field: " + field.FieldType.ToString());

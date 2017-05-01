@@ -137,6 +137,7 @@ namespace BlazBlueEditor {
                     stm.ReadByte();
                 else
                     stm.WriteByte(0x00);
+            return Entry;
         });
 
         private static FieldInvoke Padding = new FieldInvoke((Stream stm, bool Read, dynamic inst) => {
@@ -146,6 +147,7 @@ namespace BlazBlueEditor {
                 else
                     stm.WriteByte(0x00);
             }
+            return inst;
         });
     }
 
