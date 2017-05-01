@@ -52,10 +52,13 @@ namespace BlazBlueEditor
             Reader.Seek(Header.TextTableOffset, SeekOrigin.Begin);
             List<string> Strings = new List<string>();
             uint Length = 0;
+            uint Min = Header.ByteCodeStart;
             while (Reader.BaseStream.Position < Script.LongLength - 2) {
                 string Str = Reader.ReadString(StringStyle.UCString);
                 byte[] Data = GenBC(Length, Str.Length);
-                EntryPos.Add((uint)Search(Script, Data, Header.ByteCodeStart, Header.StringsTableOffset));
+                uint Pos = (uint)Search(Script, Data, Min, Header.StringsTableOffset);
+                Min = Pos;
+                EntryPos.Add(Pos);
                 Strings.Add(Str);
                 Length += (uint)Str.Length + 1;
             }
