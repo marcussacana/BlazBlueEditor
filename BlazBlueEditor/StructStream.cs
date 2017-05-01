@@ -107,6 +107,8 @@ namespace AdvancedBinary {
             FieldInfo[] fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
             long Length = 0;
             foreach (FieldInfo field in fields) {
+                if (HasAttribute(field, Const.IGNORE))
+                    continue;
                 switch (field.FieldType.ToString()) {
                     case Const.INT8:
                     case Const.UINT8:

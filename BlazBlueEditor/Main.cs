@@ -35,7 +35,6 @@ namespace BlazBlueEditor
             internal uint TextUniTableLength;
             internal uint TextTableLength;
             private int Unk14;
-#pragma warning restore 0169, 0649
         }
 
         private struct Entry {
@@ -52,6 +51,7 @@ namespace BlazBlueEditor
             [Ignore]
             internal ATFHeader Header;
         }
+#pragma warning restore 0169, 0649
 
         List<Entry> Entries;
         private ATFHeader Header;
@@ -78,6 +78,7 @@ namespace BlazBlueEditor
         }
 
         public byte[] Export(string[] Strings) {
+            uint EntryLen = (uint)Tools.GetStructLength(new Entry());
             byte[] NewScript = new byte[this.Header.TextTableOffset];
             Array.Copy(Script, NewScript, NewScript.Length);
             MemoryStream StringBuffer = new MemoryStream();
@@ -88,7 +89,7 @@ namespace BlazBlueEditor
                 dynamic Struct = EntryArr[i];
                 Struct.TextPos = Length;
                 Struct.TextUniLength = (uint)Strings[i].Length;
-                Tools.BuildStruct(ref Struct);
+                Overwrite(ref NewScript, Tools.BuildStruct(ref Struct), Header.ByteCodeLength + Header.ByteCodeStart + (EntryLen * (uint)i));
                 Length += Struct.TextUniLength + 1;
                 Writer.Write(Strings[i], StringStyle.UCString);
             }

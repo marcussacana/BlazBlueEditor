@@ -70,8 +70,11 @@ namespace BBEGui {
                     OutDir += cnt;
                 }
                 OutDir += '\\';
+                StringBuilder List = new StringBuilder();
                 System.IO.Directory.CreateDirectory(OutDir);
+                int ind = 0;
                 foreach (BlazBlueEditor.File File in Files) {
+                    List.AppendLine(string.Format("{0}={1}", ind++, File.FileName));
                     Stream Writer = new StreamWriter(OutDir + File.FileName).BaseStream;
                     int Readed = 0;
                     byte[] Buffer = new byte[1024 * 1024];
@@ -82,6 +85,7 @@ namespace BBEGui {
                     Writer.Close();
                     File.Data.Close();
                 }
+                System.IO.File.WriteAllText(OutDir + "BBE-IndexTree.txt", List.ToString(), Encoding.UTF8);
                 MessageBox.Show("Packget Extracted.");
             }
         }
@@ -92,10 +96,21 @@ namespace BBEGui {
                 SaveFileDialog save = new SaveFileDialog();
                 save.Filter = "All Pac Files|*.pac";
                 if (save.ShowDialog() == DialogResult.OK) {
-                    string[] Files = Directory.GetFiles(Folder.SelectedPath, "*.*");
-                    Array.Sort(Files);
+                    List<string> Files = new List<string>(Directory.GetFiles(Folder.SelectedPath, "*.*"));
+                    int[] Keys = new int[Files.Count - 1];
+                    string[] FList = System.IO.File.ReadAllLines(Folder.SelectedPath + "\\BBE-IndexTree.txt", Encoding.UTF8);
+                    for (int i = 0; i < Files.Count; i++) {
+                        string FN = System.IO.Path.GetFileName(Files[i]);
+                        if (FN.ToLower() == "bbe-indextree.txt") {
+                            Files.Remove(Files[i--]);
+                            continue;
+                        }
+                        Keys[i] = GetFileIndex(FN, FList);
+                    }
+                    string[] FArr = Files.ToArray();
+                    Array.Sort(Keys, FArr);
                     List<BlazBlueEditor.File> Arr = new List<BlazBlueEditor.File>();
-                    foreach (string File in Files) {
+                    foreach (string File in FArr) {
                         Arr.Add(new BlazBlueEditor.File() {
                             FileName = System.IO.Path.GetFileName(File),
                             Data = new StreamReader(File).BaseStream
@@ -105,6 +120,17 @@ namespace BBEGui {
                     MessageBox.Show("Packget Created.");
                 }
             }
+        }
+        public int GetFileIndex(string File, string[] IndexTree) {
+            string fn = File.ToLower();
+            foreach (string tree in IndexTree) {
+                int ido = tree.IndexOf("=");
+                int ID = int.Parse(tree.Substring(0, ido++));
+                string FN = tree.Substring(ido, tree.Length - ido).ToLower();
+                if (FN == fn)
+                    return ID;
+            }
+            return -1;
         }
     }
 }
