@@ -52,7 +52,7 @@ namespace BlazBlueEditor
             Reader.Seek(Header.TextTableOffset, SeekOrigin.Begin);
             List<string> Strings = new List<string>();
             uint Length = 0;
-            while (Reader.PeekChar() > 0 && Reader.BaseStream.Position < Script.LongLength - 2) {
+            while (Reader.BaseStream.Position < Script.LongLength - 2) {
                 string Str = Reader.ReadString(StringStyle.UCString);
                 byte[] Data = GenBC(Length, Str.Length);
                 EntryPos.Add((uint)Search(Script, Data, Header.ByteCodeStart, Header.StringsTableOffset));

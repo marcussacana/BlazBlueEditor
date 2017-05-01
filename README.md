@@ -1,4 +1,4 @@
-### BlazBlueEditor (BBE) - v0.1
+### BlazBlueEditor (BBE) - v0.2
 [![Build Status](https://travis-ci.org/ForumHulp/pageaddon.svg?branch=master)](http://vnx.uvnworks.com)
 
 A DLL Library tool to allow you write your own string editor in C#

@@ -4,6 +4,9 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 
+/// <summary>
+/// Advanced Binary Tools - By Marcussacana
+/// </summary>
 namespace AdvancedBinary {
 
     enum StringStyle {
